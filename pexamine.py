@@ -11,7 +11,9 @@ def PrettyPrint(text):
     print '[+] ' + text
 
 def usage():
-    PrettyPrint('Usage: ./pexamine.py <exe-file> <dll-name>')
+    PrettyPrint('Usage: ./pexamine.py <exe-file> [dll-name] [d]')
+    PrettyPrint('Optional: [dll-name] Display imports for this loaded DLL.')
+    PrettyPrint('Optional: [d] Display all imported DLL\'s.')
 
 def about():
     PrettyPrint('PEXAMINE: Created by Tristan aka R3OATH')
@@ -19,15 +21,25 @@ def about():
     PrettyPrint('~')
 
 def main(args):
-    if len(args) != 3:
+    if len(args) < 2:
         usage()
         sys.exit(1)
 
     # Mention the Author/Website :)
     about()
 
-    exe = str(args[1]) # Eg: 'C:\\Windows\\notepad.exe'
-    dll = str(args[2]) # Eg: 'USER32.dll'
+    exe = str(args[1])
+    dll = None
+
+    display_dlls = False
+    if len(args) == 4 and str(args[3]) == 'd':
+        dll = str(args[2])
+        display_dlls = True
+    elif len(args) == 3:
+        if str(args[2]) == 'd':
+            display_dlls = True
+        else:
+            dll = str(args[2])
 
     PrettyPrint('Examining EXE: %s' % exe)
     PrettyPrint('Using DLL: %s' % dll)
@@ -36,7 +48,10 @@ def main(args):
         pe = pefile.PE(exe)
         renderSectionData(pe)
         renderPackerStatus(pe)
-        renderImportsData(pe, dll)
+        if display_dlls == True:
+            renderAllDlls(pe)
+        if dll != None:
+            renderImportsData(pe, dll)
     except:
         PrettyPrint('Error: Please check argument 1 <exe-file>.')
 
@@ -55,6 +70,16 @@ def renderSectionData(pe):
     pt.add_column('Physical Address', section_addresses, align='r')
     pt.add_column('Raw Data Size', section_data_sizes, align='r')
     PrettyPrint('EXE Sectional Data:')
+    print pt
+
+def renderAllDlls(pe):
+    dll_names = []
+    for table in pe.DIRECTORY_ENTRY_IMPORT:
+        dll_names.append(table.dll)
+
+    pt = prettytable.PrettyTable()
+    pt.add_column('DLL Name', dll_names)
+    PrettyPrint('DLL Import Names:')
     print pt
 
 def renderImportsData(pe, dll_name):
