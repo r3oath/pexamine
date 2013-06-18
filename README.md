@@ -3,8 +3,6 @@ pexamine
 
 PEXAMINE displays PE sectional data, imports for specific DLL's and checks for packing.
 
-#####Created by Tristan aka R3OATH (www.r3oath.com)
-
 ###Requirements:
 PEXAMINE makes use of [Pefile](http://code.google.com/p/pefile/) and [PrettyTable](https://pypi.python.org/pypi/PrettyTable). Make sure to grab and install these before using.
 
